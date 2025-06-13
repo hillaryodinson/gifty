@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import { configDotenv } from "dotenv";
 import { logger } from "./services/logger";
 
 export const initApp = () => {
@@ -9,7 +8,12 @@ export const initApp = () => {
 	app.use(express.json());
 	app.use(express.urlencoded({ extended: true }));
 	app.use(express.static("public"));
-	app.use(logger);
+	if (
+		process.env.NODE_ENV === "production" &&
+		process.env.LOGGING === "true"
+	) {
+		app.use(logger);
+	}
 	app.use(
 		cors({
 			methods: ["GET", "POST", "PUT", "DELETE"],
