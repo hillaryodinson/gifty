@@ -13,3 +13,55 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  events    Event[]
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id        String         @id @default(cuid())
+  name      String
+  type      String // e.g., "wedding", "birthday", etc.
+  date      DateTime
+  user      User           @relation(fields: [userId], references: [id])
+  userId    String
+  wishlist  WishlistItem[]
+  createdAt DateTime       @default(now())
+}
+
+model WishlistItem {
+  id            String         @id @default(cuid())
+  title         String
+  amount        Float
+  note          String?
+  isFulfilled   Boolean        @default(false)
+  event         Event          @relation(fields: [eventId], references: [id])
+  eventId       String
+  contributions Contribution[]
+  template      GiftTemplate?  @relation(fields: [templateId], references: [id])
+  templateId    String?
+}
+
+model Contribution {
+  id              String       @id @default(cuid())
+  contributorName String
+  amount          Float
+  transactionRef  String       @unique
+  item            WishlistItem @relation(fields: [itemId], references: [id])
+  itemId          String
+  createdAt       DateTime     @default(now())
+}
+
+model GiftTemplate {
+  id              String         @id @default(cuid())
+  title           String         @unique
+  description     String?
+  imageUrl        String
+  suggestedAmount Float
+  createdAt       DateTime       @default(now())
+  wishlistItems   WishlistItem[]
+}
